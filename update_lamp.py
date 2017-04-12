@@ -7,37 +7,7 @@ from time import mktime, sleep, strptime
 import sys
 import urllib2
 import traceback
-
-
-class Color:	
-	def __init__(self, color_string):
-		assert len(color_string) == 7
-		assert color_string[:1] == '#'
-		self.r = int(color_string[1:3], 16)
-		self.g = int(color_string[3:5], 16)
-		self.b = int(color_string[5:7], 16)
-		
-		r = self.r / 255.0
-		g = self.g / 255.0
-		b = self.b / 255.0
-		rgbmin = min(r, g, b)
-		rgbmax = max(r, g, b)
-		rgb_range = rgbmax - rgbmin
-
-		self.luminance = (rgbmin + rgbmax) / 2.0
-		if self.luminance < 0.5:
-			self.saturation = rgb_range / (rgbmax + rgbmin)
-		else:
-			self.saturation = rgb_range / (2.0 - rgbmax - rgbmin)
-	
-		if r == rgbmax:
-			hue = (g - b) / rgb_range
-		if g == rgbmax:
-			hue = 2.0 + (b - r) / rgb_range
-		if b == rgbmax:
-			hue = 4.0 + (r - g) / rgb_range
-		
-		self.hue = hue * 60.0
+import base64
 
 
 def set_color(bridge, color, light_ids=None):
@@ -45,15 +15,15 @@ def set_color(bridge, color, light_ids=None):
 	for light in lights:
 		if light_ids and light.light_id not in light_ids:
 			continue
-		light.brightness = int(color.luminance * 254.0)
-		light.hue = int(color.hue * 65535.0 / 360.0)
-		light.saturation = int(color.saturation * 254.0)
+		light.brightness = color["bri"]
+		light.hue = color["hue"]
+		light.saturation = color["sat"]
 
 
 def on(bridge):
 	lights = bridge.get_light_objects()
 	for light in lights:
-		light.on = True
+			light.on = True
 
 
 def off(bridge):
@@ -65,16 +35,8 @@ def off(bridge):
 def create_team_city_client(config):
 	tc = config[u'teamcity']
 	return TeamCityRESTApiClient(
-		tc[u'user'], tc[u'password'],
+		tc[u'user'], base64.b64decode(tc[u'password']),
 		tc[u'host'], int(tc[u'port']))
-
-
-def _tc_builds_are_green(id):
-	import urllib2
-	url = "https://build.volumental.com/httpAuth/app/rest/builds/?locator=status:failure,sinceBuild:(status:success)"
-	with urllib2.urlopen(url) as response:
-		contents = response.read()
-		return 'count="0"' in contents
 
 
 def update_build_lamps(config, bridge):
@@ -85,6 +47,7 @@ def update_build_lamps(config, bridge):
 	ok_projects = []
 	for p in all_projects[u'project']:
 		project_id = p[u'id']
+		
 		if project_id in watched:
 			project = tc.get_project_by_project_id(project_id).get_from_server()
 			statuses = []
@@ -99,19 +62,20 @@ def update_build_lamps(config, bridge):
 
 	on(bridge)
 	color_key = u'success' if all(ok_projects) else u'fail'
-	set_color(bridge, Color(config[u'colors'][color_key]), config[u'groups'][u'build_lights'][u'ids'])
+	set_color(bridge, config[u'colors'][color_key], config[u'groups'][u'build_lights'][u'ids'])
 
 
 def update_lamps(config, now, bridge_creator):	
     bridge = bridge_creator(config[u'bridge'])
 
     bridge.connect()
-    bridge.get_api()
+    full_config = bridge.get_api()
+    print "Connected to bridge "+ full_config["config"]["ipaddress"] + " with bridge id: " + full_config["config"]["bridgeid"]
 
     today20 = now.replace(hour=20, minute=0, second=0, microsecond=0)
     today06 = now.replace(hour=6, minute=0, second=0, microsecond=0)
 
-    if now > today06 and now < today20:			
+    if now > today06 and now < today20:	
         update_build_lamps(config, bridge)
     else:
         off(bridge)
@@ -128,7 +92,6 @@ def _create_bridge(bridge_config):
 		print(bridges)
 		bridge_object = next(bridges)
 		host = bridge_object[u'internalipaddress']
-		print "Trying hub with address:", host
 	else:
 		host = bridge_config[u'host']
 		
