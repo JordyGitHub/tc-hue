@@ -44,38 +44,38 @@ def print_status(msg):
 
 def update_build_lamps(config, bridge):
 	ok_projects = []
-	running = False	
+	running = False	    
+
 	tc = create_team_city_client(config)	
 	all_projects = tc.get_all_projects().get_from_server()
-    watched = config[u'teamcity'][u'watch']
-
 	
-	for p in all_projects[u'project']:
-		project_id = p[u'id']
-		
-		if project_id in watched:
-			project = tc.get_project_by_project_id(project_id).get_from_server()
-			statuses = []
-			for build_type in project[u'buildTypes'][u'buildType']:
-				#print "now checking ", build_type[u'id']
-				# Get build status for specified build type id
-				b = tc.get_all_builds().set_build_type(build_type[u'id']).set_lookup_limit(2).set_running(False).get_from_server()
-				if u'build' in b:
-					status = b[u'build'][0][u'status']
-					print_status(b[u'build'][0][u'buildTypeId'] + " " + str(status))
-					statuses.append(status)
-				ok_projects.append(not 'FAILURE' in statuses)
+	for watch_project in config[u'teamcity'][u'watch']:
+		for p in all_projects[u'project']:
+			project_id = p[u'id']
 
-				# Getting current running builds for specified build type id
-				r = tc.get_all_builds().set_build_type(build_type[u'id']).set_lookup_limit(2).set_running(True).get_from_server()
-				if u'build' in r:
-					print_status(r[u'build'][0][u'buildTypeId'] + " Running" )
-					running = r[u'build'][0][u'running']
+			if project_id in watch_project[u'projectid']:
+				project = tc.get_project_by_project_id(project_id).get_from_server()
+				statuses = []
+				for build_type in project[u'buildTypes'][u'buildType']:
+					#print "now checking ", build_type[u'id']
+					# Get build status for specified build type id
+					b = tc.get_all_builds().set_build_type(build_type[u'id']).set_lookup_limit(2).set_running(False).get_from_server()
+					if u'build' in b:
+						status = b[u'build'][0][u'status']
+						print_status(b[u'build'][0][u'buildTypeId'] + " " + str(status))
+						statuses.append(status)
+					ok_projects.append(not 'FAILURE' in statuses)
 
-	color_key = u'success' if all(ok_projects) else u'fail'
-	if running:
-		color_key = u'running'
-	set_color(bridge, config[u'colors'][color_key], config[u'groups'][u'build_lights'][u'ids'])
+					# Getting current running builds for specified build type id
+					r = tc.get_all_builds().set_build_type(build_type[u'id']).set_lookup_limit(2).set_running(True).get_from_server()
+					if u'build' in r:
+						print_status(r[u'build'][0][u'buildTypeId'] + " Running" )
+						running = r[u'build'][0][u'running']
+
+		color_key = u'success' if all(ok_projects) else u'fail'
+		if running:
+			color_key = u'running'
+		set_color(bridge, config[u'colors'][color_key], watch_project[u'light_ids'])
 
 
 def update_lamps(config, now, bridge_creator):	

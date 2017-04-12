@@ -1,33 +1,39 @@
 {
-  "bridge": {
-    "id": null,
-    "host": "<hostname>"
-  },
-  "colors": {
-    "success": "#00ee33",
-    "fail": "#ff0000",
-      "volumental_mint" : "#76c69e",
-      "twitter_blue" : "#0000ff",
-      "twitter_orange" : "#FBCD36"
-  },
-  "teamcity": {
-    "host": "build.volumental.com",
-    "port": "443",
-    "user": "",
-    "password": "",
-    "watch": [
-    ]
-  },
-  "groups":  {
-    "build_lights": { "ids": null },
-    "twitter_lights": {
-      "ids": [ 2 ]
-    }
-  },
-  "twitter_settings": {
-    "consumer_key": "",
-    "consumer_secret": "",
-    "access_token": "",
-    "access_token_secret": ""
-  }
+	"bridge": {
+		"host": "<ip address>"
+	},
+	"colors": {
+		"success": {
+			"hue": 25555,
+			"bri": 254,
+			"sat": 254,
+			"effect": "none"
+		},
+		"fail": {
+			"hue": 0,
+			"bri": 254,
+			"sat": 254,
+			"effect": "none"
+		},
+		"running": {
+			"hue": 25555,
+			"bri": 254,
+			"sat": 254,
+			"effect": "colorloop"
+		}
+	},
+	"teamcity": {
+		"host": "<team city ip/host>",
+		"port": "",
+		"user": "",
+		"password": "<base64 password>",
+		"watch": [{
+			"projectid": "project_id_1",
+			"light_ids": [1, 2]
+		},
+		{
+			"projectid": "project_id_2",
+			"light_ids": [3]
+		}]
+	}
 }
