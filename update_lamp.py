@@ -44,12 +44,13 @@ def print_status(msg):
 
 def update_build_lamps(config, bridge):
 	ok_projects = []
-	running = False	    
 
 	tc = create_team_city_client(config)	
 	all_projects = tc.get_all_projects().get_from_server()
+	failed_build = False
 	
 	for watch_project in config[u'teamcity'][u'watch']:
+		running = False
 		for p in all_projects[u'project']:
 			project_id = p[u'id']
 
@@ -62,20 +63,28 @@ def update_build_lamps(config, bridge):
 					b = tc.get_all_builds().set_build_type(build_type[u'id']).set_lookup_limit(2).set_running(False).get_from_server()
 					if u'build' in b:
 						status = b[u'build'][0][u'status']
-						print_status(b[u'build'][0][u'buildTypeId'] + " " + str(status))
 						statuses.append(status)
 					ok_projects.append(not 'FAILURE' in statuses)
 
 					# Getting current running builds for specified build type id
 					r = tc.get_all_builds().set_build_type(build_type[u'id']).set_lookup_limit(2).set_running(True).get_from_server()
 					if u'build' in r:
-						print_status(r[u'build'][0][u'buildTypeId'] + " Running" )
+						print_status(r[u'build'][0][u'buildTypeId'] + " RUNNING" )
 						running = r[u'build'][0][u'running']
-
+					else:
+						print_status(b[u'build'][0][u'buildTypeId'] + " " + str(status))
+	
 		color_key = u'success' if all(ok_projects) else u'fail'
 		if running:
 			color_key = u'running'
+		if (u'fail' in color_key):
+			failed_build = True;
+
 		set_color(bridge, config[u'colors'][color_key], watch_project[u'light_ids'])
+	
+	#if(failed_build):
+	#	import subprocess
+	#	subprocess.call(['omxplayer', 'alert.mp3'])
 
 
 def update_lamps(config, now, bridge_creator):	
