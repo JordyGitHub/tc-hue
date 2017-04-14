@@ -43,14 +43,14 @@ def print_status(msg):
     print(time.strftime("%H:%M:%S") + ': ' + msg)
 
 def update_build_lamps(config, bridge):
-	ok_projects = []
-
+	
 	tc = create_team_city_client(config)	
 	all_projects = tc.get_all_projects().get_from_server()
-	failed_build = False
 	
 	for watch_project in config[u'teamcity'][u'watch']:
 		running = False
+		failed_build = False
+		ok_projects = []
 		for p in all_projects[u'project']:
 			project_id = p[u'id']
 
