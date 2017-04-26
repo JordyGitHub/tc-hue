@@ -123,7 +123,7 @@ class TeamCityRESTApiClient:
 
     def get_from_server(self):
         full_resource_url = self.compose_resource_path()
-        #print full_resource_url
+        print full_resource_url
         req = urllib2.Request(full_resource_url)
         base64string = base64.encodestring(self.userpass).replace('\n', '')
         req.add_header("Authorization", "Basic %s" % base64string)

@@ -44,8 +44,12 @@ def print_status(msg):
 
 def update_build_lamps(config, bridge):
 	
-	tc = create_team_city_client(config)	
+	tc = create_team_city_client(config)
 	all_projects = tc.get_all_projects().get_from_server()
+	
+	with open('projects.txt', 'w') as file_handler:
+		for p in all_projects[u'project']:
+			file_handler.write("%s\n" % p[u'id'])
 	
 	for watch_project in config[u'teamcity'][u'watch']:
 		running = False
@@ -71,8 +75,10 @@ def update_build_lamps(config, bridge):
 					if u'build' in r:
 						print_status(r[u'build'][0][u'buildTypeId'] + " RUNNING" )
 						running = r[u'build'][0][u'running']
-					else:
+					elif u'build' in b:
 						print_status(b[u'build'][0][u'buildTypeId'] + " " + str(status))
+					else:
+						print_status("No builds found!")
 	
 		color_key = u'success' if all(ok_projects) else u'fail'
 		if running:
@@ -94,10 +100,10 @@ def update_lamps(config, now, bridge_creator):
     full_config = bridge.get_api()
     print_status("Connected to bridge "+ full_config["config"]["ipaddress"] + " with bridge id: " + full_config["config"]["bridgeid"])
 
-    today20 = now.replace(hour=20, minute=0, second=0, microsecond=0)
+    today18 = now.replace(hour=18, minute=0, second=0, microsecond=0)
     today06 = now.replace(hour=6, minute=0, second=0, microsecond=0)
 
-    if now > today06 and now < today20:	
+    if now > today06 and now < today18:	
         update_build_lamps(config, bridge)
     else:
         off(bridge)
