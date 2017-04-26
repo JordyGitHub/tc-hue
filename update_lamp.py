@@ -64,7 +64,7 @@ def update_build_lamps(config, bridge):
 				for build_type in project[u'buildTypes'][u'buildType']:
 					#print "now checking ", build_type[u'id']
 					# Get build status for specified build type id
-					b = tc.get_all_builds().set_build_type(build_type[u'id']).set_lookup_limit(2).set_running(False).get_from_server()
+					b = tc.get_all_builds().set_build_type(build_type[u'id']).set_lookup_limit(2).set_branch("default:any").set_running(False).get_from_server()
 					if u'build' in b:
 						status = b[u'build'][0][u'status']
 						statuses.append(status)
