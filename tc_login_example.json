@@ -1,0 +1,8 @@
+{
+    "teamcity": {
+        "host": "<ip address>",
+        "port": "80",
+        "user": "<username>",
+        "password": "<base64 encoded password>"
+    }
+}
