@@ -23,21 +23,25 @@
         }
     },
     "teamcity": {
-        "host": "<ip address>",
-        "port": "80",
-        "user": "<username>",
-        "password": "<base64 encoded password>",
-        "watch": [{
-            "projectid": "<project id name>",
-            "light_ids": {"1":"Description"}
-        },
-        {
-            "projectid": "<project id name>",
-            "light_ids": {"2":"Description"}
-        },
-        {
-            "projectid": "<project id name>",
-            "light_ids": {"3":"Description"}
-        }]
+        "watch": [
+            {
+                "projectid": "<project id name>",
+                "light_ids": {
+                    "1": "<Description>"
+                }
+            },
+            {
+                "projectid": "<project id name>",
+                "light_ids": {
+                    "2": "<Description>"
+                  }
+            },
+            {
+                "projectid": "<project id name>",
+                "light_ids": {
+                    "3":"Description"
+                }
+            }
+        ]
     }
 }
