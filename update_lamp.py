@@ -99,12 +99,12 @@ def update_lamps(tc_login, config, now, bridge_creator):
 
     bridge.connect()
     full_config = bridge.get_api()
-    print_status("Connected to bridge "+ full_config["config"]["ipaddress"] + " with bridge id: " + full_config["config"]["bridgeid"])
 
     today18 = now.replace(hour=18, minute=0, second=0, microsecond=0)
     today06 = now.replace(hour=6, minute=0, second=0, microsecond=0)
 
-    if now > today06 and now < today18:    
+    if now > today06 and now < today18:
+        print_status("Connected to bridge "+ full_config["config"]["ipaddress"] + " with bridge id: " + full_config["config"]["bridgeid"])
         update_build_lamps(tc_login, config, bridge)
     else:
         off(bridge)
